@@ -1,0 +1,29 @@
+function zshAscii() {
+  
+  #regex pattern
+  regex='\%F\{.*?\}'
+  if [[ "$1" =~ $regex ]]; then
+        color=$1  #set to provided color
+    else
+        color="%F{reset}"  #No Color provided.  Defaulting to regular color
+    fi
+  
+  
+  
+  echo "${(%)color}
+  ZZZZZZZZZZZZZZZZZZZZZZZZZ       SSSSSSSSSSSSSSSS      HHHHHHHHHHH   HHHHHHHHHHH
+  Z:::::::::::::::::::::::Z     S::::::::::::::::::S    H:::::::::H   H:::::::::H
+  Z:::::ZZZZZZZZZZ::::::::Z   S:::::::SSSSSSSSS::::::S  HHH:::::HHH   HHH:::::HHH
+  ZZZZZZZ      Z::::::::Z    S::::::S          SSSSSSS    H:::::H       H:::::H
+            Z::::::::Z       S:::::S                      H:::::H       H:::::H
+          Z::::::::Z   zshrc   S:::::SSSSSSSSSSSS         H:::::HHHHHHHHH:::::H
+        Z::::::::Z  ver: ${2}   S::::::::::::::::S       H:::::::::::::::::::H
+      Z::::::::Z   ${3}    SSSSSSSSSSS::::::S     H:::::HHHHHHHHH:::::H
+    Z:::::::Z                                 S:::::S     H:::::H       H:::::H
+  Z::::::::Z        ZZZZZZZ  SSSSSSS         S::::::S     H:::::H       H:::::H
+  Z:::::::::ZZZZZZZZZ:::::Z   S:::::SSSSSSSSSS:::::S    HHH:::::HHH   HHH:::::HHH
+  Z:::::::::::::::::::::::Z     S:::::::::::::::::S     H:::::::::H   H:::::::::H
+  ZZZZZZZZZZZZZZZZZZZZZZZZZ       SSSSSSSSSSSSSSS       HHHHHHHHHHH   HHHHHHHHHHH
+
+  "
+}
