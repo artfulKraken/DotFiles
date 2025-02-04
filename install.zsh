@@ -128,7 +128,7 @@ if [[ -d $scriptPath/.asciiArt ]] ; then
   fi
   # copy new .asciiArt dir to user home dir.
   if [[ $flgBkUpSuccess ]] ; then
-    cp ${scriptPath}/.asciiArt ~/ 
+    cp -r ${scriptPath}/.asciiArt ~/ 
     if [[ $? == 0 ]] ; then
       echo "${G}Replaced .asciiArt dir${NoColor}"
     else
@@ -173,7 +173,7 @@ if [[ -d $scriptPath/zsh-syntax-highlighting ]] ; then
   fi
   # copy new zsh-syntax-highlighting dir to user home dir.
   if [[ $flgBkUpSuccess ]] ; then
-    cp ${scriptPath}/zsh-syntax-highlighting /usr/share/ 
+    cp -r ${scriptPath}/zsh-syntax-highlighting /usr/share/ 
     if [[ $? == 0 ]] ; then
       echo "${G}Replaced zsh-syntax-highlighting dir${NoColor}"
     else
@@ -197,19 +197,6 @@ else
 fi
 
 
-
-# zsh autosuggestions
-# if zsh autosuggestions exists
-if [[ -d /usr/share/zsh-autosuggestions ]]; then
-  #Create backup folder if it doesn't exist. 
-  sudo mkdir -p /usr/share/zsh.bkup
-  # put dated syntax highlighting dir in backup dir
-  sudo mv /usr/share/zsh-autosuggestions /usr/share/zsh.bkup/zsh-autosuggestions.${curDate}.bkup
-  echo "${G}Backed up zsh-autosuggestions dir${NoColor}"
-fi
-sudo cp -r ${scriptPath}/zsh-autosuggestions /usr/share/zsh-autosuggestions
-echo "${G}Replaced zsh-autosuggestions dir${NoColor}"
-
 #zsh-autosuggestions
 if [[ -d $scriptPath/zsh-autosuggestions ]] ; then
   echo "${B}Updating zsh-autosuggestions dir${NoColor}"
@@ -231,7 +218,7 @@ if [[ -d $scriptPath/zsh-autosuggestions ]] ; then
   fi
   # copy new zsh-autosuggestions dir to user home dir.
   if [[ $flgBkUpSuccess ]] ; then
-    cp ${scriptPath}/zsh-autosuggestions /usr/share/ 
+    cp -r ${scriptPath}/zsh-autosuggestions /usr/share/ 
     if [[ $? == 0 ]] ; then
       echo "${G}Replaced zsh-autosuggestions dir${NoColor}"
     else
@@ -253,8 +240,6 @@ if [[ -d $scriptPath/zsh-autosuggestions ]] ; then
 else
   echo "${R}No zsh-autosuggestions dir in Git folder.  Skipping zsh-autosuggestions updates${NoColor}"
 fi
-
-
 
 
 #.vimrc
@@ -323,7 +308,7 @@ if [[ -d $scriptPath/.vim ]] ; then
   fi
   # copy new .vim dir to user home dir.
   if [[ $flgBkUpSuccess ]] ; then
-    cp ${scriptPath}/.vim ~/ 
+    cp -r ${scriptPath}/.vim ~/ 
     if [[ $? == 0 ]] ; then
       echo "${G}Replaced .vim dir${NoColor}"
     else
