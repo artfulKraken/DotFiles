@@ -48,7 +48,7 @@ NoColor='\033[0m'  #returns to default color.  Used in any other situations.
 
 ## Check if running as root/sudo/admin.  If not, warn user to rerun as sudo and exit.
 if [[ $EUID -ne 0 ]]; then
-  echo "${R}You must hae  root priveleges to run this script. Please re-run it using sudo.${NoColor}"
+  echo "${R}You must have root priveleges to run this script. Please re-run it using sudo.${NoColor}"
   exit 100
 fi
 
