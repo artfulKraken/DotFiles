@@ -9,7 +9,7 @@
 #   support files
 #
 # Author: artfulKraken 
-# Version: 1.0.1
+# Version: 0.1.1
 # Date: 2025-02-03
 #
 # Adds or replaces zsh, bash, vim config files and supporting dirs/files.
