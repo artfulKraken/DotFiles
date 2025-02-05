@@ -84,6 +84,10 @@ if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
     debian_chroot=$(cat /etc/debian_chroot)
 fi
 
+# Add ~/.bin to PATH variable
+PATH+=:~/.bin
+
+
 ###################Autoload Functions.  ##############################
 # Add directory(ies) to fpath that functions are stored in
 fpath+=~/.zshfn  #genral zsh functions
