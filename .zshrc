@@ -84,7 +84,20 @@ if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
     debian_chroot=$(cat /etc/debian_chroot)
 fi
 
-# Add ~/.bin to PATH variable
+################### Mac Only ########################################
+# Mac Only additions
+if [[ $OSTYPE =~ darwin ]] ; then
+  # Add gnubin to begining of path. Used to replace gnu versions of commands
+  # with mac version if they are different.
+  PATH="/opt/homebrew/opt/gnu-sed/libexec/gnubin:$PATH"
+  if [[ $( which sed ) == "/usr/bin/sed" ]] ; then
+    echo " ! Recommend installing gnu-sed with your favorite package manager" \
+      "to ensure sed works consistently across mac and linux systems"
+  fi
+
+fi
+
+################### Update Path #####################################
 PATH+=:~/.bin
 
 
@@ -164,8 +177,8 @@ if [ "$color_prompt" = yes ]; then
     configure_prompt
 
     # enable syntax-highlighting
-    if [ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
-        . /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+    if [ -f ${HOME}/.zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+        . ${HOME}/.zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
         ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern)
         ZSH_HIGHLIGHT_STYLES[default]=none
         ZSH_HIGHLIGHT_STYLES[unknown-token]=underline
@@ -290,9 +303,13 @@ alias ....="cd ..;cd ..;cd .."
 alias .....="cd ..;cd ..;cd ..;cd .."  
 alias ......="cd ..;cd ..;cd ..;cd ..;cd .."
 
+# git aliases
+alias gita="git add ."
+alias gitc="git commit -m"
+
 # enable auto-suggestions based on the history
-if [ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
-    . /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+if [ -f ${HOME}/.zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+    . ${HOME}/.zsh-autosuggestions/zsh-autosuggestions.zsh
     # change suggestion color
     ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#999'
 fi

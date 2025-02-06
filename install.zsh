@@ -46,14 +46,8 @@ NoColor='\033[0m'  #returns to default color.  Used in any other situations.
 ############################################################
 ############################################################
 
-## Check if running as root/sudo/admin.  If not, warn user to rerun as sudo and exit.
-if [[ $EUID -ne 0 ]]; then
-  echo "${R}You must have root priveleges to run this script. Please re-run it using sudo.${NoColor}"
-  exit 100
-fi
-
 # save iso datetime to variable for use in backups
-curDate=$(date -u +"%Y-%m-%dT%H:%M:%S%z")
+ curDate=$(date -u +"%Y-%m-%dT%H:%M:%S%z")
 
 # absolute path to this script
 scriptPath=${0:a}
@@ -67,11 +61,11 @@ if [[ -f $scriptPath/.zshrc ]] ; then
   echo "${B}Updating .zshrc file${NoColor}"
 
   # if .zshrc file exists
-  if [[ -f ~/.zshrc ]]; then
+  if [[ -f ${HOME}/.zshrc ]]; then
     # Create backup dir if it does not exist.
-    mkdir -p ~/.zshrc.bkup
+    mkdir -p ${HOME}/.zshrc.bkup
     #move old .zshrc file to backup
-    mv ~/.zshrc ~/.zshrc.bkup/.zshrc.${curDate}.bkup
+    mv ${HOME}/.zshrc ${HOME}/.zshrc.bkup/.zshrc.${curDate}.bkup
     if [[ $? == 0 ]] ; then
       echo "${G}Backed up .zshrc file${NoColor}" 
     else
@@ -83,13 +77,13 @@ if [[ -f $scriptPath/.zshrc ]] ; then
   fi
   # copy new .zshrc file to user home dir.
   if [[ $flgBkUpSuccess ]] ; then
-    cp ${scriptPath}/.zshrc ~/ 
+    cp ${scriptPath}/.zshrc ${HOME}/ 
     if [[ $? == 0 ]] ; then
       echo "${G}Replaced .zshrc file${NoColor}"
     else
       echo "${R}Unable to update .zshrc file." 
       if [[ flgPathExists ]] ; then
-        mv ~/.zshrc.bkup/.zshrc.${curDate}.bkup ~/.zshrc
+        mv ${HOME}/.zshrc.bkup/.zshrc.${curDate}.bkup ${HOME}/.zshrc
         if [[ $? == 0 ]] ; then
           echo "${G} Your original .zshrc file was placed back at the original location.${NoColor}"
         else
@@ -112,11 +106,11 @@ if [[ -d $scriptPath/.asciiArt ]] ; then
   echo "${B}Updating .asciiArt dir${NoColor}"
 
   # if .asciiArt dir exists
-  if [[ -d ~/.asciiArt ]]; then
+  if [[ -d ${HOME}/.asciiArt ]]; then
     # Create backup dir if it does not exist.
-    mkdir -p ~/.asciiArt.bkup
+    mkdir -p ${HOME}/.asciiArt.bkup
     #move old .asciiArt dir to backup
-    mv ~/.asciiArt ~/.asciiArt.bkup/.asciiArt.${curDate}.bkup
+    mv ${HOME}/.asciiArt ${HOME}/.asciiArt.bkup/.asciiArt.${curDate}.bkup
     if [[ $? == 0 ]] ; then
       echo "${G}Backed up .asciiArt dir${NoColor}" 
     else
@@ -128,13 +122,13 @@ if [[ -d $scriptPath/.asciiArt ]] ; then
   fi
   # copy new .asciiArt dir to user home dir.
   if [[ $flgBkUpSuccess ]] ; then
-    cp -r ${scriptPath}/.asciiArt ~/ 
+    cp -r ${scriptPath}/.asciiArt ${HOME}/ 
     if [[ $? == 0 ]] ; then
       echo "${G}Replaced .asciiArt dir${NoColor}"
     else
       echo "${R}Unable to update .asciiArt dir." 
       if [[ flgPathExists ]] ; then
-        mv ~/.asciiArt.bkup/.asciiArt.${curDate}.bkup ~/.asciiArt
+        mv ${HOME}/.asciiArt.bkup/.asciiArt.${curDate}.bkup ${HOME}/.asciiArt
         if [[ $? == 0 ]] ; then
           echo "${G} Your original .asciiArt dir was placed back at the original location.${NoColor}"
         else
@@ -152,93 +146,93 @@ else
 fi
 
 
-#zsh-syntax-highlighting
-if [[ -d $scriptPath/zsh-syntax-highlighting ]] ; then
-  echo "${B}Updating zsh-syntax-highlighting dir${NoColor}"
+#.zsh-syntax-highlighting
+if [[ -d $scriptPath/.zsh-syntax-highlighting ]] ; then
+  echo "${B}Updating .zsh-syntax-highlighting dir${NoColor}"
 
-  # if zsh-syntax-highlighting dir exists
-  if [[ -d /usr/share/zsh-syntax-highlighting ]]; then
+  # if .zsh-syntax-highlighting dir exists
+  if [[ -d ${HOME}/.zsh-syntax-highlighting ]]; then
     # Create backup dir if it does not exist.
-    mkdir -p /usr/share/zsh-syntax-highlighting.bkup
-    #move old zsh-syntax-highlighting dir to backup
-    mv /usr/share/zsh-syntax-highlighting /usr/share/zsh-syntax-highlighting.bkup/zsh-syntax-highlighting.${curDate}.bkup
+    mkdir -p ${HOME}/.zsh-syntax-highlighting.bkup
+    #move old .zsh-syntax-highlighting dir to backup
+    mv ${HOME}/.zsh-syntax-highlighting ${HOME}/.zsh-syntax-highlighting.bkup/.zsh-syntax-highlighting.${curDate}.bkup
     if [[ $? == 0 ]] ; then
-      echo "${G}Backed up zsh-syntax-highlighting dir${NoColor}" 
+      echo "${G}Backed up .zsh-syntax-highlighting dir${NoColor}" 
     else
-      echo "${R}Could not backup zsh-syntax-highlighting dir.  Dir zsh-syntax-highlighting will not be updated${NoColor}"
+      echo "${R}Could not backup .zsh-syntax-highlighting dir.  Dir .zsh-syntax-highlighting will not be updated${NoColor}"
       flgBkUPSuccess=false
     fi
   else
     flgPathExists=false
   fi
-  # copy new zsh-syntax-highlighting dir to user home dir.
+  # copy new .zsh-syntax-highlighting dir to user home dir.
   if [[ $flgBkUpSuccess ]] ; then
-    cp -r ${scriptPath}/zsh-syntax-highlighting /usr/share/ 
+    cp -r ${scriptPath}/.zsh-syntax-highlighting ${HOME}/ 
     if [[ $? == 0 ]] ; then
-      echo "${G}Replaced zsh-syntax-highlighting dir${NoColor}"
+      echo "${G}Replaced .zsh-syntax-highlighting dir${NoColor}"
     else
-      echo "${R}Unable to update zsh-syntax-highlighting dir." 
+      echo "${R}Unable to update .zsh-syntax-highlighting dir." 
       if [[ flgPathExists ]] ; then
-        mv /usr/share/zsh-syntax-highlighting.bkup/zsh-syntax-highlighting.${curDate}.bkup /usr/share/zsh-syntax-highlighting
+        mv ${HOME}/.zsh-syntax-highlighting.bkup/.zsh-syntax-highlighting.${curDate}.bkup ${HOME}/.zsh-syntax-highlighting
         if [[ $? == 0 ]] ; then
-          echo "${G} Your original zsh-syntax-highlighting dir was placed back at the original location.${NoColor}"
+          echo "${G} Your original .zsh-syntax-highlighting dir was placed back at the original location.${NoColor}"
         else
-          echo "Your original zsh-syntax-highlighting dir could not be put back at the original location.${NoColor}"
+          echo "Your original .zsh-syntax-highlighting dir could not be put back at the original location.${NoColor}"
         fi
       else
-        echo "${B}Original zsh-syntax-highlighting dir did not exist.  No changes were made to zsh-syntax-highlighting${NoColor}"
+        echo "${B}Original .zsh-syntax-highlighting dir did not exist.  No changes were made to .zsh-syntax-highlighting${NoColor}"
       fi
     fi
   fi
   flgBkUpSuccess=true
   flgPathExists=true
 else
-  echo "${R}No zsh-syntax-highlighting dir in Git folder.  Skipping zsh-syntax-highlighting updates${NoColor}"
+  echo "${R}No .zsh-syntax-highlighting dir in Git folder.  Skipping .zsh-syntax-highlighting updates${NoColor}"
 fi
 
 
-#zsh-autosuggestions
-if [[ -d $scriptPath/zsh-autosuggestions ]] ; then
-  echo "${B}Updating zsh-autosuggestions dir${NoColor}"
+#.zsh-autosuggestions
+if [[ -d $scriptPath/.zsh-autosuggestions ]] ; then
+  echo "${B}Updating .zsh-autosuggestions dir${NoColor}"
 
-  # if zsh-autosuggestions dir exists
-  if [[ -d /usr/share/zsh-autosuggestions ]]; then
+  # if .zsh-autosuggestions dir exists
+  if [[ -d ${HOME}/.zsh-autosuggestions ]]; then
     # Create backup dir if it does not exist.
-    mkdir -p /usr/share/zsh-autosuggestions.bkup
-    #move old zsh-autosuggestions dir to backup
-    mv /usr/share/zsh-autosuggestions /usr/share/zsh-autosuggestions.bkup/zsh-autosuggestions.${curDate}.bkup
+    mkdir -p ${HOME}/.zsh-autosuggestions.bkup
+    #move old .zsh-autosuggestions dir to backup
+    mv ${HOME}/.zsh-autosuggestions ${HOME}/.zsh-autosuggestions.bkup/.zsh-autosuggestions.${curDate}.bkup
     if [[ $? == 0 ]] ; then
-      echo "${G}Backed up zsh-autosuggestions dir${NoColor}" 
+      echo "${G}Backed up .zsh-autosuggestions dir${NoColor}" 
     else
-      echo "${R}Could not backup zsh-autosuggestions dir.  Dir zsh-autosuggestions will not be updated${NoColor}"
+      echo "${R}Could not backup .zsh-autosuggestions dir.  Dir .zsh-autosuggestions will not be updated${NoColor}"
       flgBkUPSuccess=false
     fi
   else
     flgPathExists=false
   fi
-  # copy new zsh-autosuggestions dir to user home dir.
+  # copy new .zsh-autosuggestions dir to user home dir.
   if [[ $flgBkUpSuccess ]] ; then
-    cp -r ${scriptPath}/zsh-autosuggestions /usr/share/ 
+    cp -r ${scriptPath}/.zsh-autosuggestions ${HOME}/ 
     if [[ $? == 0 ]] ; then
-      echo "${G}Replaced zsh-autosuggestions dir${NoColor}"
+      echo "${G}Replaced .zsh-autosuggestions dir${NoColor}"
     else
-      echo "${R}Unable to update zsh-autosuggestions dir." 
+      echo "${R}Unable to update .zsh-autosuggestions dir." 
       if [[ flgPathExists ]] ; then
-        mv /usr/share/zsh-autosuggestions.bkup/zsh-autosuggestions.${curDate}.bkup /usr/share/zsh-autosuggestions
+        mv ${HOME}/.zsh-autosuggestions.bkup/.zsh-autosuggestions.${curDate}.bkup ${HOME}/.zsh-autosuggestions
         if [[ $? == 0 ]] ; then
-          echo "${G} Your original zsh-autosuggestions dir was placed back at the original location.${NoColor}"
+          echo "${G} Your original .zsh-autosuggestions dir was placed back at the original location.${NoColor}"
         else
-          echo "Your original zsh-autosuggestions dir could not be put back at the original location.${NoColor}"
+          echo "Your original .zsh-autosuggestions dir could not be put back at the original location.${NoColor}"
         fi
       else
-        echo "${B}Original zsh-autosuggestions dir did not exist.  No changes were made to zsh-autosuggestions${NoColor}"
+        echo "${B}Original .zsh-autosuggestions dir did not exist.  No changes were made to .zsh-autosuggestions${NoColor}"
       fi
     fi
   fi
   flgBkUpSuccess=true
   flgPathExists=true
 else
-  echo "${R}No zsh-autosuggestions dir in Git folder.  Skipping zsh-autosuggestions updates${NoColor}"
+  echo "${R}No .zsh-autosuggestions dir in Git folder.  Skipping .zsh-autosuggestions updates${NoColor}"
 fi
 
 
@@ -247,11 +241,11 @@ if [[ -f $scriptPath/.vimrc ]] ; then
   echo "${B}Updating .vimrc file${NoColor}"
 
   # if .vimrc file exists
-  if [[ -f ~/.vimrc ]]; then
+  if [[ -f ${HOME}/.vimrc ]]; then
     # Create backup dir if it does not exist.
-    mkdir -p ~/.vimrc.bkup
+    mkdir -p ${HOME}/.vimrc.bkup
     #move old .vimrc file to backup
-    mv ~/.vimrc ~/.vimrc.bkup/.vimrc.${curDate}.bkup
+    mv ${HOME}/.vimrc ${HOME}/.vimrc.bkup/.vimrc.${curDate}.bkup
     if [[ $? == 0 ]] ; then
       echo "${G}Backed up .vimrc file${NoColor}" 
     else
@@ -263,13 +257,13 @@ if [[ -f $scriptPath/.vimrc ]] ; then
   fi
   # copy new .vimrc file to user home dir.
   if [[ $flgBkUpSuccess ]] ; then
-    cp ${scriptPath}/.vimrc ~/ 
+    cp ${scriptPath}/.vimrc ${HOME}/ 
     if [[ $? == 0 ]] ; then
       echo "${G}Replaced .vimrc file${NoColor}"
     else
       echo "${R}Unable to update .vimrc file." 
       if [[ flgPathExists ]] ; then
-        mv ~/.vimrc.bkup/.vimrc.${curDate}.bkup ~/.vimrc
+        mv ${HOME}/.vimrc.bkup/.vimrc.${curDate}.bkup ${HOME}/.vimrc
         if [[ $? == 0 ]] ; then
           echo "${G} Your original .vimrc file was placed back at the original location.${NoColor}"
         else
@@ -292,11 +286,11 @@ if [[ -d $scriptPath/.vim ]] ; then
   echo "${B}Updating .vim dir${NoColor}"
 
   # if .vim dir exists
-  if [[ -d ~/.vim ]]; then
+  if [[ -d ${HOME}/.vim ]]; then
     # Create backup dir if it does not exist.
-    mkdir -p ~/.vim.bkup
+    mkdir -p ${HOME}/.vim.bkup
     #move old .vim dir to backup
-    mv ~/.vim ~/.vim.bkup/.vim.${curDate}.bkup
+    mv ${HOME}/.vim ${HOME}/.vim.bkup/.vim.${curDate}.bkup
     if [[ $? == 0 ]] ; then
       echo "${G}Backed up .vim dir${NoColor}" 
     else
@@ -308,13 +302,13 @@ if [[ -d $scriptPath/.vim ]] ; then
   fi
   # copy new .vim dir to user home dir.
   if [[ $flgBkUpSuccess ]] ; then
-    cp -r ${scriptPath}/.vim ~/ 
+    cp -r ${scriptPath}/.vim ${HOME}/ 
     if [[ $? == 0 ]] ; then
       echo "${G}Replaced .vim dir${NoColor}"
     else
       echo "${R}Unable to update .vim dir." 
       if [[ flgPathExists ]] ; then
-        mv ~/.vim.bkup/.vim.${curDate}.bkup ~/.vim
+        mv ${HOME}/.vim.bkup/.vim.${curDate}.bkup ${HOME}/.vim
         if [[ $? == 0 ]] ; then
           echo "${G} Your original .vim dir was placed back at the original location.${NoColor}"
         else
@@ -337,11 +331,11 @@ if [[ -f $scriptPath/.bashrc ]] ; then
   echo "${B}Updating .bashrc file${NoColor}"
 
   # if .bashrc file exists
-  if [[ -f ~/.bashrc ]]; then
+  if [[ -f ${HOME}/.bashrc ]]; then
     # Create backup dir if it does not exist.
-    mkdir -p ~/.bashrc.bkup
+    mkdir -p ${HOME}/.bashrc.bkup
     #move old .bashrc file to backup
-    mv ~/.bashrc ~/.bashrc.bkup/.bashrc.${curDate}.bkup
+    mv ${HOME}/.bashrc ${HOME}/.bashrc.bkup/.bashrc.${curDate}.bkup
     if [[ $? == 0 ]] ; then
       echo "${G}Backed up .bashrc file${NoColor}" 
     else
@@ -353,13 +347,13 @@ if [[ -f $scriptPath/.bashrc ]] ; then
   fi
   # copy new .bashrc file to user home dir.
   if [[ $flgBkUpSuccess ]] ; then
-    cp ${scriptPath}/.bashrc ~/ 
+    cp ${scriptPath}/.bashrc ${HOME}/ 
     if [[ $? == 0 ]] ; then
       echo "${G}Replaced .bashrc file${NoColor}"
     else
       echo "${R}Unable to update .bashrc file." 
       if [[ flgPathExists ]] ; then
-        mv ~/.bashrc.bkup/.bashrc.${curDate}.bkup ~/.bashrc
+        mv ${HOME}/.bashrc.bkup/.bashrc.${curDate}.bkup ${HOME}/.bashrc
         if [[ $? == 0 ]] ; then
           echo "${G} Your original .bashrc file was placed back at the original location.${NoColor}"
         else
@@ -376,4 +370,49 @@ else
   echo "${R}No .bashrc file in Git folder.  Skipping .bashrc updates${NoColor}"
 fi
 
+
+#gpg.conf
+if [[ -f $scriptPath/gpg.conf ]] ; then
+  echo "${B}Updating gpg.conf file${NoColor}"
+
+  # if gpg.conf file exists
+  if [[ -f ${HOME}/.gnupg/gpg.conf ]]; then
+    # Create backup dir if it does not exist.
+    mkdir -p ${HOME}/.gnupg/gpg.conf.bkup
+    #move old gpg.conf file to backup
+    mv ${HOME}/.gnupg/gpg.conf ${HOME}/.gnupg/gpg.conf.bkup/gpg.conf.${curDate}.bkup
+    if [[ $? == 0 ]] ; then
+      echo "${G}Backed up gpg.conf file${NoColor}" 
+    else
+      echo "${R}Could not backup gpg.conf file.  File gpg.conf will not be updated${NoColor}"
+      flgBkUPSuccess=false
+    fi
+  else
+    flgPathExists=false
+  fi
+  # copy new gpg.conf file to user home dir.
+  if [[ $flgBkUpSuccess ]] ; then
+    cp ${scriptPath}/gpg.conf ${HOME}/.gnupg/ 
+    if [[ $? == 0 ]] ; then
+      echo "${G}Replaced gpg.conf file${NoColor}"
+      ./keepGpgCust.zsh "${HOME}/.gnupg/gpg.conf.bkup/gpg.conf.${curDate}.bkup" "${HOME}/.gnupg/gpg.conf"
+    else
+      echo "${R}Unable to update gpg.conf file." 
+      if [[ flgPathExists ]] ; then
+        mv ${HOME}/.gnupg/gpg.conf.bkup/gpg.conf.${curDate}.bkup ${HOME}/.gnupg/gpg.conf
+        if [[ $? == 0 ]] ; then
+          echo "${G} Your original gpg.conf file was placed back at the original location.${NoColor}"
+        else
+          echo "Your original gpg.conf file could not be put back at the original location.${NoColor}"
+        fi
+      else
+        echo "${B}Original gpg.conf file did not exist.  No changes were made to gpg.conf${NoColor}"
+      fi
+    fi
+  fi
+  flgBkUpSuccess=true
+  flgPathExists=true
+else
+  echo "${R}No gpg.conf file in Git folder.  Skipping gpg.conf updates${NoColor}"
+fi
 
