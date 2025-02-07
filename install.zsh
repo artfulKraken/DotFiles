@@ -374,7 +374,8 @@ fi
 #gpg.conf
 if [[ -f $scriptPath/gpg.conf ]] ; then
   echo "${B}Updating gpg.conf file${NoColor}"
-
+  # create .gnugp folder (if it doesn't exist) if gpg has not been run yet.
+  mkdir -p ${HOME}/.gnugp
   # if gpg.conf file exists
   if [[ -f ${HOME}/.gnupg/gpg.conf ]]; then
     # Create backup dir if it does not exist.
