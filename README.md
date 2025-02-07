@@ -1,8 +1,8 @@
 # DotFiles
 Configs (and supporting files) for .zshrc, .bashrc, .vimrc, gpg.conf that I run. These are almost all customizations I've picked up over time from others.
 
-## Install
-Install config files by running `sudo install.zsh`.  Must have root priveledeges to run script.
+## Install and Update
+Install or update config files by running `install.zsh`.  
 
 ## Script Actions
 ### Files / Dirs Backed Up
