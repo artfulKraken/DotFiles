@@ -46,6 +46,11 @@ NoColor='\033[0m'  #returns to default color.  Used in any other situations.
 ############################################################
 ############################################################
 
+if [ "$EUID" -ne 0 ]
+  then echo "Please use sudo to run as root"
+  exit
+fi
+
 # Config Files and Directories to install.  DIRS MUST HAVE / AT END OF NAME TO SIGNIFY DIRECTORY
 newConfigs=( ".zshrc" ".asciiArt/" ".zsh-syntax-highlighting/" ".zsh-autosuggestions/" ".bashrc" ".vimrc" ".vim/" "gpg.conf" )
 
@@ -65,6 +70,7 @@ scriptPath=$(dirname $scriptPath)
 
 flgBkUpSuccess=true
 flgPathExists=true
+flgRoot=false
 
 declare -A confFile
 
@@ -83,19 +89,26 @@ for config in ${newConfigs} ; do
     echo "${B}Updating ${confFile[name]} file${NoColor}"
     case ${confFile[name]} in
       gpg.conf)
-          sudo -u $OWNER mkdir -p $HOME/.gnupg
+          USERAGENT=$OWNER
           basePath=$HOME/.gnupg
+          sudo -u $USERAGENT mkdir -p $HOME/.gnupg
         ;;
+      sshd_conf)
+        USERAGENT=root
+        basePath="/etc/ssh"
       *)
+        USERAGENT=$OWNER
         basePath=$HOME
         ;;
     esac
     # if file exists
     if [ -e "${basePath}/${confFile[name]}" ]; then
       # Create backup dir if it does not exist.
-      sudo -u ${OWNER} mkdir -p ${basePath}/${confFile[name]}.bkup
+      sudo -u ${USERAGENT} mkdir -p ${basePath}/${confFile[name]}.bkup
       #move old ${confFile[name]} file to backup
-      mv ${basePath}/${confFile[name]} ${basePath}/${confFile[name]}.bkup/${confFile[name]}.${curDate}.bkup
+      
+      sudo -u ${USERAGENT} mv ${basePath}/${confFile[name]} ${basePath}/${confFile[name]}.bkup/${confFile[name]}.${curDate}.bkup
+      
       if [[ $? == 0 ]] ; then
         echo "${G}Backed up ${confFile[name]} ${confFile[type]}${NoColor}" 
       else
@@ -107,7 +120,7 @@ for config in ${newConfigs} ; do
     fi
     # copy new file to user home dir.
     if [[ $flgBkUpSuccess ]] ; then
-      sudo -u $OWNER cp -R ${scriptPath}/${confFile[name]} ${basePath}/ 
+      sudo -u ${USERAGENT} cp -R ${scriptPath}/${confFile[name]} ${basePath}/ 
       if [[ $? == 0 ]] ; then
         echo "${G}Replaced ${confFile[name]} ${confFile[type]}${NoColor}"
         
@@ -121,7 +134,7 @@ for config in ${newConfigs} ; do
       else
         echo "${R}Unable to update ${confFile[name]} ${confFile[type]}." 
         if [[ flgPathExists ]] ; then
-          mv ${basePath}/${confFile[name]}.bkup/${confFile[name]}.${curDate}.bkup ${basePath}/${confFile[name]}
+          sudo -u ${USERAGENT} mv ${basePath}/${confFile[name]}.bkup/${confFile[name]}.${curDate}.bkup ${basePath}/${confFile[name]}
           if [[ $? == 0 ]] ; then
             echo "${G} Your original ${confFile[name]} ${confFile[type]} was placed back at the original location.${NoColor}"
           else
