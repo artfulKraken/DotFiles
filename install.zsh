@@ -96,6 +96,7 @@ for config in ${newConfigs} ; do
       sshd_conf)
         USERAGENT=root
         basePath="/etc/ssh"
+        ;;
       *)
         USERAGENT=$OWNER
         basePath=$HOME
