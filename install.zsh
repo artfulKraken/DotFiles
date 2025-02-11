@@ -45,32 +45,33 @@ NoColor='\033[0m'  #returns to default color.  Used in any other situations.
 # Main program                                             #
 ############################################################
 ############################################################
-
 if [ "$EUID" -ne 0 ]
   then echo "Please use sudo to run as root"
   exit
 fi
-
 # Config Files and Directories to install.  DIRS MUST HAVE / AT END OF NAME TO SIGNIFY DIRECTORY
 newConfigs=( ".zshrc" ".asciiArt/" ".zsh-syntax-highlighting/" ".zsh-autosuggestions/" ".bashrc" ".vimrc" ".vim/" "sshd_config" "gpg.conf" )
 
 # check if mac or linux os
 if [[ $OSTYPE =~ "darwin" ]] ; then
-  OWNER=$( stat -f "%Su" $HOME )
+  echo "Remember to check if mac properly uses \$SUDU_USER. if so, simplify without if statement"
+  HM_OWNER=$SUDO_USER
 else
-  OWNER=$( stat -c "%U" $HOME )
+  HM_OWNER=$SUDO_USER
 fi
 
+HM_PATH="/home/${HM_OWNER}"
+echo ${HM_PATH}
+echo "Home Owner: ${HM_OWNER}"
+echo "Root User: ${USER}"
+
+scriptPath=${0:a:h}
+echo "script path ${scriptPath}"
 # save iso datetime to variable for use in backups
  curDate=$(date -u +"%Y-%m-%dT%H:%M:%S%z")
 
-# absolute path to this script
-scriptPath=${0:a}
-scriptPath=$(dirname $scriptPath)
-
 flgBkUpSuccess=true
 flgPathExists=true
-flgRoot=false
 
 declare -A confFile
 
@@ -89,20 +90,23 @@ for config in ${newConfigs} ; do
     echo "${B}Updating ${confFile[name]} file${NoColor}"
     case ${confFile[name]} in
       gpg.conf)
-          USERAGENT=$OWNER
-          basePath=$HOME/.gnupg
-          sudo -u $USERAGENT mkdir -p $HOME/.gnupg
+          USERAGENT=$HM_OWNER
+          basePath=$HM_PATH/.gnupg
+          sudo -u $USERAGENT mkdir -p $HM_PATH/.gnupg
         ;;
       sshd_conf)
-        USERAGENT=root
+        USERAGENT=${USER}
         basePath="/etc/ssh"
         ;;
       *)
-        USERAGENT=$OWNER
-        basePath=$HOME
+        USERAGENT=$HM_OWNER
+        basePath=$HM_PATH
         ;;
     esac
     # if file exists
+    echo "File: ${confFile[name]}"
+    echo "File Owner: ${USERAGENT}"
+    echo "Base Path: ${basePath}"
     if [ -e "${basePath}/${confFile[name]}" ]; then
       # Create backup dir if it does not exist.
       sudo -u ${USERAGENT} mkdir -p ${basePath}/${confFile[name]}.bkup
