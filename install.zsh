@@ -132,7 +132,7 @@ while getopts "hu:p:" option; do
   esac
 done
 echo "got to line 134"
-if [[ -z ${user} ]]
+if [[ -z ${user} ]] ; then
   echo "got to line 136"
   HM_OWNER=$SUDO_USER
 else
