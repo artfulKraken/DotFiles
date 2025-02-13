@@ -113,7 +113,6 @@ while getopts "hu:p:" option; do
       flgUserFound=false
       # repeat giving interactive shell user the oportunity to change user name to valid response
       while [[ $flgUserFound == false ]] ; do
-        echo "entered while"
         # loop through users array to compare user
         for u in $users ;  do
           if [[ $u == $user ]] ; then
@@ -131,26 +130,17 @@ while getopts "hu:p:" option; do
       ;;
   esac
 done
-echo "got to line 134"
 if [[ -z ${user} ]] ; then
-  echo "got to line 136"
   HM_OWNER=$SUDO_USER
 else
-  echo "got to line 139"
   HM_OWNER=$user
 fi
-
-echo "User: ${user}\nPort: ${port}\nSudo User: $SUDO_USER"
-exit 143
 
 # Config Files and Directories to install.  DIRS MUST HAVE / AT END OF NAME TO SIGNIFY DIRECTORY
 newConfigs=( ".zshrc" ".asciiArt/" ".zsh-syntax-highlighting/" ".zsh-autosuggestions/" ".bashrc" ".vimrc" ".vim/" "sshd_config" "gpg.conf" )
 
 
 HM_PATH="/home/${HM_OWNER}"
-echo ${HM_PATH}
-echo "Home Owner: ${HM_OWNER}"
-echo "Root User: ${USER}"
 
 scriptPath=${0:a:h}
 echo "script path ${scriptPath}"
