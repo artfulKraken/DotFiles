@@ -87,9 +87,9 @@ while getopts "hu:p:" option; do
   case $option in
       
     h) # Print to screen help file and exit
-        Help
-        exit 0
-        ;;
+      Help
+      exit 0
+      ;;
     p)
       port=$OPTARG
       while [[ ! ( $port =~ $portRegEx )  ]] ; do
@@ -107,7 +107,7 @@ while getopts "hu:p:" option; do
         exit 2
       fi
       # get non-system users (id > 1000).
-      IFS=$'\n' users=($(grep -P -e '^[^:]*:[^:]*:(?!65534)[1-9][0-9]{3}' /etc/passwd | cut -d ":" -f1)) 
+      IFS=$'\n' users=$(grep -P -e "^[^:]*:[^:]*:(?!65534)[1-9][0-9]{3}" /etc/passwd | cut -d ":" -f1)
 
       # check if supplied user is in non-system users
       flgUserFound=false
@@ -121,7 +121,7 @@ while getopts "hu:p:" option; do
           fi
         done
         if [[ $flgUserFound == false ]] ; then
-          echo "{R}You must enter a valid username with the -u option.  Please enter a valid user${NoColor}"
+          echo "${R}You must enter a valid username with the -u option.  Please enter a valid user${NoColor}"
           read user
         fi
       done
@@ -129,17 +129,19 @@ while getopts "hu:p:" option; do
     \?) # Invalid option
       echo "${R}Error: ${option} is invalid.  Skipping ${option}${NoColor}"
       ;;
-    esac
+  esac
 done
-
+echo "got to line 134"
 if [[ -z ${user} ]]
+  echo "got to line 136"
   HM_OWNER=$SUDO_USER
 else
+  echo "got to line 139"
   HM_OWNER=$user
 fi
 
 echo "User: ${user}\nPort: ${port}\nSudo User: $SUDO_USER"
-exit 0
+exit 143
 
 # Config Files and Directories to install.  DIRS MUST HAVE / AT END OF NAME TO SIGNIFY DIRECTORY
 newConfigs=( ".zshrc" ".asciiArt/" ".zsh-syntax-highlighting/" ".zsh-autosuggestions/" ".bashrc" ".vimrc" ".vim/" "sshd_config" "gpg.conf" )
