@@ -1,0 +1,19 @@
+#!/bin/zsh
+
+function verifyPort {
+  # Verifies that port is within the range of appropriate computer
+  # ports ( 1 - 65535 ).  Does not confirm if ports are currently 
+  # in use by other programs systems
+  # Exits with error if not valid port.  Exits with no error if
+  # valid port
+
+  # regex expression matching 1 - through 65535
+  portRegEx="^(6553[0-5]|655[0-2][0-9]|65[0-4][0-9][0-9]|6[0-4][0-9][0-9][0-9]|[1-5][0-9][0-9][0-9][0-9]|[1-9][0-9][0-9][0-9]|[1-9][0-9][0-9]|[1-9][0-9]|[1-9])$"
+
+  # compare function arguement to RegEx pattern
+  if [[ ! ( $1 =~ $portRegEx )  ]] ; then
+    # if it doesn't match the 
+    exit 1
+  fi
+  # exit with no error if valid port number
+  exit 0

@@ -1,0 +1,134 @@
+#!/bin/zsh
+
+
+function sshdUpdate {
+  # Update sshd_config port #.  Check if old file had modified port, check if user supplied port.
+  # Ask user how to handle based on situation.  
+  
+  # up to 3 parameters expected.  New sshd File location required.  port number and old sshd file location not required
+  # -c current sshd_config file
+  # -n new sshd_config file
+  # -p port
+
+
+  declare -A C
+  C[colErr]='\033[0;31m'   #'0;31' is Red's ANSI color code.  Used to notify user of failed operations or inputs.
+  C[colSuccess]='\033[0;32m'   #'0;32' is Green's ANSI color code.  Used to notify user of successful operations.
+  C[colQuest]='\033[1;33m'   #'1;32' is Yellow's ANSI color code. Used to denote question to user.
+  C[colNotice]='\033[0;34m'   #'0;34' is Blue's ANSI color code.  Used to update user on progress and next steps, without confirming success.
+  C[NC]='\033[0m'  #returns to default color.  Used in any other situations.
+
+  while getopts "p:c:n:" option; do
+
+    case $option in
+        
+      p)
+        portRegEx="^(6553[0-5]|655[0-2][0-9]|65[0-4][0-9][0-9]|6[0-4][0-9][0-9][0-9]|[1-5][0-9][0-9][0-9][0-9]|[1-9][0-9][0-9][0-9]|[1-9][0-9][0-9]|[1-9][0-9]|[1-9])$"
+        port=$OPTARG
+        while [[ ! ( $port =~ $portRegEx )  ]] ; do
+          echo "${C[colErr]}Invalid Port number.  Please enter a valid port (1 - 65535) to use for ssh.${C[NC]}"
+          read port
+        done
+        port="Port ${port}"
+        ;;
+      c)
+        curSshdFile=$OPTARG
+        ;;
+      n)
+        newSshdFile=$OPTARG
+        ;;
+      w)
+        C=$OPTARG
+        ;;
+      \?) # Invalid option
+        echo "${C[colErr]}Error: ${option} is invalid.  Skipping ${option}${C[NC]}"
+        ;;
+    esac
+  done
+  
+  # confirm if new sshd_config file exists.  if not exit with error 
+  if [[ -z ${newSshdFile} ]] ; then
+    echo "${C[colErr]}Error.  The new sshd_config file does not exist.  Unable to update file.${C[NC]}"
+    exit 1
+  fi  
+
+  # confirm if backup file
+  if [[ -z ${curSshdFile} ]] ; then
+    oldPort=
+  else
+    # Get old port info
+    
+    oldPorts=()
+    
+    while IFS=$'\\' read -r line; do
+      oldPorts+=("$line")
+    done < <( grep -e "^ *Port " ${curSshdFile} )
+    if [[ ${#oldPorts[@]} > 1 ]] ; then
+      echo "${C[colNotice]}There was more than 1 port entry in your old sshd_config file. Extra Port entries will not be included in the new file${C[NC]}"
+    fi
+    oldPort=${oldPorts[-1]}
+  fi
+  # Conditions to address
+  if [[ -z $port ]] ; then
+    # No new port supplied
+    if [[ -z $oldPort ]] ; then
+      # No port in old sshd_config file
+      # no new port, no old port - tell user standard port
+      echo "Default Port 22 used for ssh server"
+    else
+      # Port specified in old sshd_file
+      # no new port specified, old port exists - ask if keep old port
+      echo "${C[colQuest]}Your current ssh configuration uses ${oldPort}.  Would you like to keep that port? (y/n)${C[NC]}"
+      read response
+      while [[ ! ($response =~ "^[YyNn]$" ) ]] ; do
+        echo "${C[colErr]}Invalid response.  Would you like to continue using ${oldPort}? (y/n)${C[NC]}"
+        read response
+      done
+      if [[ $response =~ "^[Yy]$" ]] ; then
+        # Replace Port with old port
+        sed -r -i "s|^#Port 22$|${oldPort}|" ${newSshdFile}
+        echo "${C[colSuccess]}sshd_config updated to ${oldPort}${C[NC]}"
+      else
+        echo "${C[colSuccess]}Default Port 22 used in sshd_config file${C[NC]}"
+      fi
+    fi
+  else
+    # New port specified
+    if [[ -z $oldPort ]] ; then
+      # No old port
+      # new port specified, no old port - update and notify
+      sed -r -i "s|^#Port 22$|${port}|" ${newSshdFile}
+      echo "${C[colSuccess]}sshd_config updated to ${port}${C[NC]}"
+    else
+      # Old port specified
+      # new port specified, old port exists,  confirm with user if they want to use new or old port.   
+      if [[ $port == $oldPort ]]; then
+        # new port and old port are the same.  Update sshd_config
+        sed -r -i "s|^#Port 22$|${oldPort}|" ${newSshdFile}
+        echo "${C[colSuccess]}The current ssh port is the same as the new port.  sshd_config port is: ${oldPort}${C[NC]}"
+      else
+        echo "${C[colQuest]}You are currently using ${oldPort} and requested to update to ${port}.\n" \
+          "Confirm which port you want to use by entering the number of your choice:\n" \
+          "  1.    Use ${port} \n" \
+          "  2.    Use ${oldPort} \n" \
+          "  3.    Use default Port 22${C[NC]}"
+        read response
+        while [[ ! ( $response =~ ^[1-3]$ ) ]] ; do 
+          echo "${C[colErr]}Invalid choice. Please enter a valid choice 1 - 3.${C[NC]}"
+          read response
+        done
+        if [[ $response == 1 ]] ; then
+          # Use New port in sshd_config
+          sed -r -i "s|^#Port 22$|${port}|" ${newSshdFile}
+          echo "${C[colSuccess]}sshd_config was updated to ${port}${C[NC]}"
+        elif [[ $response == 2 ]]; then
+          # Use old  port in sshd_config
+          sed -r -i "s|^#Port 22$|${oldPort}|" ${newSshdFile}
+          echo "${C[colSuccess]}sshd_config was updated to ${oldPort}${C[NC]}"
+        else
+          echo "${C[colSuccess]}sshd_config is using default Port 22${C[NC]}"
+        fi
+      fi
+    fi
+  fi  
+}

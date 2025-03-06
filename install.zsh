@@ -1,31 +1,28 @@
 #!/bin/zsh
 ############################################################
-############################################################
-############################################################
 # install.zsh 
 ############################################################
-############################################################
-# Purpose: Install .zshrc, .bashrc, & .vimrc and their 
-#   support files
+# Purpose: Install .zshrc, .bashrc, & .vimrc .tmux.conf 
+# gpg.conf sshd_conf and their support files
 #
 # Author: artfulKraken 
-# Version: 0.1.2
-# Date: 2025-02-03
+# Version: 0.1.3
+# Date: 2025-02-20
 #
-# Adds or replaces zsh, bash, vim config files and supporting dirs/files.
-# Files are saved in folder they reside in as <filename>.bkup/<filename>.<isoDateTime>.bkup
-# Dirs are saved in folder they reside in as <dirname>.bkup/<dirname>.<isoDateTime>.bkup 
-# shellrc file ie (.bashrc or .zshrc) must be sourced ie cmd: source zsh.rc or shell restarted before use.
+# Adds or replaces config files and supporting dirs/files
+# (listed above).
+# Files are saved in folder they reside in as 
+# <filename>.bkup/<filename>.<isoDateTime>.bkup
+# Dirs are saved in folder they reside in as 
+# <dirname>.bkup/<dirname>.<isoDateTime>.bkup 
+# shellrc file ie (.bashrc or .zshrc) must be sourced 
+# ie cmd: source zsh.rc or shell restarted before use.
 #
-############################################################
 ############################################################
 
-############################################################
 ############################################################
 # Configuration                                            #
 ############################################################
-############################################################
-
 # Set script to use standard zsh parameters
 emulate -LR zsh
 
@@ -34,22 +31,19 @@ emulate -LR zsh
 ############################################################
 # Terminal Text colors for user feedback.
 # colors for echo options
-R='\033[0;31m'   #'0;31' is Red's ANSI color code.  Used to notify user of failed operations or inputs.
-G='\033[0;32m'   #'0;32' is Green's ANSI color code.  Used to notify user of successful operations.
-Y='\033[1;33m'   #'1;32' is Yellow's ANSI color code. Used to denote question to user.
-B='\033[0;34m'   #'0;34' is Blue's ANSI color code.  Used to update user on progress and next steps, without confirming success.
-NoColor='\033[0m'  #returns to default color.  Used in any other situations.
+declare -A C
+C[colErr]='\033[0;31m'   #'0;31' is Red's ANSI color code.  Used to notify user of failed operations or inputs.
+C[colSuccess]='\033[0;32m'   #'0;32' is Green's ANSI color code.  Used to notify user of successful operations.
+C[colQuest]='\033[1;33m'   #'1;32' is Yellow's ANSI color code. Used to denote question to user.
+C[colNotice]='\033[0;34m'   #'0;34' is Blue's ANSI color code.  Used to update user on progress and next steps, without confirming success.
+C[NC]='\033[0m'  #returns to default color.  Used in any other situations.
 
-############################################################
 ############################################################
 # Functions                                                #
 ############################################################
-############################################################
-
 
 ############################################################
-# any specific functions needed                            #
-############################################################
+# Help function
 Help()
 {
    # Display Help
@@ -59,19 +53,16 @@ Help()
    echo "options:"
    echo
    echo "h               Print this Help."
+   echo "w               Info Colors used to notify user during script"
    echo "u <userName>    Installs config files for the supplied user. If u option is not provided" \
-     ", installs for current user.  <userName> must be supplied with u option." \
-
+     ", installs for current user.  <userName> must be supplied with u option. Currently does not " \
+     "work with mac."
    echo "p <port>        Specifies port to use for ssh in sshd_config file. Uses standard port 22" \
      "if p option is not used.  <port> must be supplied with u option."
-     
-
 }
 
 ############################################################
-############################################################
 # Main program                                             #
-############################################################
 ############################################################
 
 # Confirm script is being run as root (sudo)
@@ -80,10 +71,16 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+# path to this script
+scriptPath="${0:a:h}"
+# add functions to fpath and autoload functions
+fpath=( "${scriptPath}/zFunctions" "${fpath[@]}" )
+autoload -Uz sshdUpdate
+
 # RegEx pattern to ensure valid port number 1-65535.  Does not confirm if port already in use.
 portRegEx="^(6553[0-5]|655[0-2][0-9]|65[0-4][0-9][0-9]|6[0-4][0-9][0-9][0-9]|[1-5][0-9][0-9][0-9][0-9]|[1-9][0-9][0-9][0-9]|[1-9][0-9][0-9]|[1-9][0-9]|[1-9])$"
 # Get the options if provided
-while getopts "hu:p:" option; do
+while getopts "hu:p:w:" option; do
   case $option in
       
     h) # Print to screen help file and exit
@@ -93,10 +90,13 @@ while getopts "hu:p:" option; do
     p)
       port=$OPTARG
       while [[ ! ( $port =~ $portRegEx )  ]] ; do
-        echo "${R}Invalid Port number.  Please enter a valid port (1 - 65535) to use for ssh.${NoColor}"
+        echo "${C[colErr]}Invalid Port number.  Please enter a valid port (1 - 65535) to use for ssh.${C[NC]}g"
         read port
       done
-      port="Port ${port}"
+      port=${port}
+      ;;
+    w)
+      C=$OPTARG
       ;;
     u)
       user=$OPTARG
@@ -120,13 +120,13 @@ while getopts "hu:p:" option; do
           fi
         done
         if [[ $flgUserFound == false ]] ; then
-          echo "${R}You must enter a valid username with the -u option.  Please enter a valid user${NoColor}"
+          echo "${C[colErr]}You must enter a valid username with the -u option.  Please enter a valid user${C[NC]}g"
           read user
         fi
       done
       ;;
     \?) # Invalid option
-      echo "${R}Error: ${option} is invalid.  Skipping ${option}${NoColor}"
+      echo "${C[colErr]}Error: ${option} is invalid.  Skipping ${option}${C[NC]}g"
       ;;
   esac
 done
@@ -137,13 +137,11 @@ else
 fi
 
 # Config Files and Directories to install.  DIRS MUST HAVE / AT END OF NAME TO SIGNIFY DIRECTORY
-newConfigs=( ".zshrc" ".asciiArt/" ".zsh-syntax-highlighting/" ".zsh-autosuggestions/" ".bashrc" ".vimrc" ".vim/" "sshd_config" "gpg.conf" )
+newConfigs=( ".zshrc" ".asciiArt/" ".zsh-syntax-highlighting/" ".zsh-autosuggestions/" ".bashrc" ".vimrc" ".vim/" ".tmux.conf" "sshd_config" "gpg.conf" )
 
 
 HM_PATH="/home/${HM_OWNER}"
 
-scriptPath=${0:a:h}
-echo "script path ${scriptPath}"
 # save iso datetime to variable for use in backups
  curDate=$(date -u +"%Y-%m-%dT%H:%M:%S%z")
 
@@ -153,6 +151,8 @@ flgPathExists=true
 declare -A confFile
 
 for config in ${newConfigs} ; do
+  flgBkUpDir=false
+
   if [[ ${config:(-1)} == "/" ]] ; then
     confFile[name]=${config:0:-1}
     confFile[type]="dir"
@@ -164,12 +164,12 @@ for config in ${newConfigs} ; do
   fi
 
   if [ -e "$scriptPath/${confFile[name]}" ] ; then
-    echo "${B}Updating ${confFile[name]} file${NoColor}"
+    echo "${C[colNotice]}Updating ${confFile[name]} file${C[NC]}g"
     case ${confFile[name]} in
       gpg.conf)
           USERAGENT=$HM_OWNER
-          basePath=$HM_PATH/.gnupg
-          sudo -u $USERAGENT mkdir -p $HM_PATH/.gnupg
+          basePath="$HM_PATH/.gnupg"
+          sudo -u $USERAGENT mkdir -p "$HM_PATH/.gnupg"
         ;;
       sshd_config)
         USERAGENT=${USER}
@@ -177,24 +177,30 @@ for config in ${newConfigs} ; do
         ;;
       *)
         USERAGENT=$HM_OWNER
-        basePath=$HM_PATH
+        basePath="$HM_PATH"
         ;;
     esac
+    
+    # Set variables for file/dir, backup file/dir and backup dir
+    confFilePath="${newSshdFile}"
+    bkUpConfFilePath="${newSshdFile}.bkup/${confFile[name]}.${curDate}.bkup"
+    bkUpConfLoc="${newSshdFile}.bkup"
+    
     # if file exists
-    echo "File: ${confFile[name]}"
-    echo "File Owner: ${USERAGENT}"
-    echo "Base Path: ${basePath}"
-    if [ -e "${basePath}/${confFile[name]}" ]; then
+    if [ -e "${newSshdFile}" ]; then
       # Create backup dir if it does not exist.
-      sudo -u ${USERAGENT} mkdir -p ${basePath}/${confFile[name]}.bkup
+      sudo -u ${USERAGENT} mkdir -p "${bkUpConfLoc}"
+      if [[ $? == 0 ]] ; then
+        flgBkUpDir=true
+      fi
       #move old ${confFile[name]} file to backup
       
-      sudo -u ${USERAGENT} mv ${basePath}/${confFile[name]} ${basePath}/${confFile[name]}.bkup/${confFile[name]}.${curDate}.bkup
+      sudo -u ${USERAGENT} mv "${newSshdFile}" "${bkUpConfFilePath}"
       
       if [[ $? == 0 ]] ; then
-        echo "${G}Backed up ${confFile[name]} ${confFile[type]}${NoColor}" 
+        echo "${C[colSuccess]}Backed up ${confFile[name]} ${confFile[type]}${C[NC]}g" 
       else
-        echo "${R}Could not backup ${confFile[name]} ${confFile[type]}.  ${confFile[type]} ${confFile[name]} will not be updated${NoColor}"
+        echo "${C[colErr]}Could not backup ${confFile[name]} ${confFile[type]}.  ${confFile[type]} ${confFile[name]} will not be updated${C[NC]}g"
         flgBkUPSuccess=false
       fi
     else
@@ -202,119 +208,40 @@ for config in ${newConfigs} ; do
     fi
     # copy new file to user home dir.
     if [[ $flgBkUpSuccess ]] ; then
-      sudo -u ${USERAGENT} cp -R ${scriptPath}/${confFile[name]} ${basePath}/ 
+      sudo -u ${USERAGENT} cp -R "${scriptPath}/${confFile[name]}" "${basePath}/"
       if [[ $? == 0 ]] ; then
-        echo "${G}Replaced ${confFile[name]} ${confFile[type]}${NoColor}"
+        echo "${C[colSuccess]}Replaced ${confFile[name]} ${confFile[type]}${C[NC]}g"
         
-        # Any special modifications per file tyoe
+        # Any special modifications per file type
         case ${confFile[name]} in 
-          gpg.conf)     
-            ./keepGpgCust.zsh "${basePath}/${confFile[name]}.bkup/${confFile[name]}.${curDate}.bkup" "${basePath}/${confFile[name]}"
+          gpg.conf)
+            if [[ flgBkUpDir == true ]] ; then     
+              ./keepGpgCust.zsh  "${bkUpConfFilePath}" "${newSshdFile}"
+            fi
             ;;
           sshd_config)
-            # Update sshd_config port #.  Check if old file had modified port, check if user supplied port.
-            # Ask user how to handle based on situation.  
-
-            # confirm if backup file
-            if [[ -z ${basePath}/${confFile[name]}.bkup/${confFile[name]}.${curDate}.bkup ]] ; then
-              oldPort=  
-            else
-              # Get old port info
-              
-              oldPorts=()
-              
-              while IFS=$'\\' read -r line; do
-                oldPorts+=("$line")
-              done < <( grep -e "^ *Port " ${basePath}/${confFile[name]}.bkup/${confFile[name]}.${curDate}.bkup )
-              if [[ ${#oldPorts[@]} > 1 ]] ; then
-                echo "${B}There was more than 1 port entry in your old sshd_config file. Extra Port entries will not be included in the new file${NoColor}"
-              fi
-              oldPort=${oldPorts[-1]}
-            fi
-            # Conditions to address
-            if [[ -z $port ]] ; then
-              # No new port supplied
-              if [[ -z $oldPort ]] ; then
-                # No port in old sshd_config file
-                # no new port, no old port - tell user standard port
-                echo "Default Port 22 used for ssh server"
-              else
-                # Port specified in old sshd_file
-                # no new port specified, old port exists - ask if keep old port
-                echo "${Y}Your current ssh configuration uses ${oldPort}.  Would you like to keep that port? (y/n)${NoColor}"
-                read response
-                while [[ ! ($response =~ [YyNn] ) ]] ; do
-                  echo "${R}Invalid response.  Would you like to continue using ${oldPort}? (y/n)${NoColor}"
-                  read response
-                done
-                if [[ $Response =~ [Yy] ]] ; then
-                  # Replace Port with old port
-                  sed -r -i "s|^#Port 22$|${oldPort}|" ${basePath}/${confFile[name]}
-                  echo "${G}sshd_config updated to ${oldPort}${NoColor}"
-                else
-                  echo "${G}Default Port 22 used in sshd_config file${NoColor}"
-                fi
-              fi
-            else
-              # New port specified
-              if [[ -z $oldPort ]] ; then
-                # No old port
-                # new port specified, no old port - update and notify
-                sed -r -i "s|^#Port 22$|${port}|" ${basePath}/${confFile[name]}
-                echo "${G}sshd_config updated to ${oldPort}${NoColor}"
-              else
-                # Old port specified
-                # new port specified, old port exists,  confirm with user if they want to use new or old port.   
-                if [[ $port == $oldPort ]]; then
-                  # new port and old port are the same.  Update sshd_config
-                  sed -r -i "s|^#Port 22$|${oldPort}|" ${basePath}/${confFile[name]}
-                  echo "${G}sshd_config updated to ${oldPort}${NoColor}"
-                else
-                  echo "${Y}You are currently using ${oldPort} and requested to update to ${port}.\n" \
-                    "Confirm which port you want to use by entering the number of your choice:\n" \
-                    "  1.    Use ${port} \n" \
-                    "  2.    Use ${oldPort} \n" \
-                    "  3.    Use default Port 22${NoColor}"
-                  read response
-                  while [[ ! ( $response =~ ^[1-3]$ ) ]] ; do 
-                    echo "${R}Invalid choice. Please enter a valid choice 1 - 3.${NoColor}"
-                    read response
-                  done
-                  if [[ $response == 1 ]] ; then
-                    # Use New port in sshd_config
-                    sed -r -i "s|^#Port 22$|${port}|" ${basePath}/${confFile[name]}
-                    echo "sshd_config was updated to ${port}"
-                  elif [[ $response == 2]]; then
-                    # Use old  port in sshd_config
-                    sed -r -i "s|^#Port 22$|${oldPort}|" ${basePath}/${confFile[name]}
-                    echo "sshd_config was updated to ${oldPort}"
-                  else
-                    echo "sshd_config is using default Port 22"
-                  fi
-                fi
-              fi
-            fi  
+            sshdUpdate -p $port -n "${newSshdFile}" -c "${bkUpConfFilePath}"
             ;;
           *)
             ;;
         esac  
       else
-        echo "${R}Unable to update ${confFile[name]} ${confFile[type]}." 
+        echo "${C[colErr]}Unable to update ${confFile[name]} ${confFile[type]}.${C[NC]}" 
         if [[ flgPathExists ]] ; then
-          sudo -u ${USERAGENT} mv ${basePath}/${confFile[name]}.bkup/${confFile[name]}.${curDate}.bkup ${basePath}/${confFile[name]}
+          sudo -u ${USERAGENT} mv "${bkUpConfFilePath}"
           if [[ $? == 0 ]] ; then
-            echo "${G} Your original ${confFile[name]} ${confFile[type]} was placed back at the original location.${NoColor}"
+            echo "${C[colSuccess]} Your original ${confFile[name]} ${confFile[type]} was placed back at the original location.${C[NC]}g"
           else
-            echo "Your original ${confFile[name]} ${confFile[type]} could not be put back at the original location.${NoColor}"
+            echo "Your original ${confFile[name]} ${confFile[type]} could not be put back at the original location.${C[NC]}g"
           fi
         else
-          echo "${B}Original ${confFile[name]} ${confFile[type]} did not exist.  No changes were made to ${confFile[name]}${NoColor}"
+          echo "${C[colNotice]}Original ${confFile[name]} ${confFile[type]} did not exist.  No changes were made to ${confFile[name]}${C[NC]}g"
         fi
       fi
     fi
     flgBkUpSuccess=true
     flgPathExists=true
   else
-    echo "${R}No ${confFile[name]} ${confFile[type]} in Git folder.  Skipping ${confFile[name]} updates${NoColor}"
+    echo "${C[colErr]}No ${confFile[name]} ${confFile[type]} in Git folder.  Skipping ${confFile[name]} updates${C[NC]}g"
   fi
 done
