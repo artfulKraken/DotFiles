@@ -234,7 +234,7 @@ for config in ${newConfigs} ; do
             # Conditions to address
             if [[ -z $port ]] ; then
               # No new port supplied
-              if [[ -z $oldPort ]]
+              if [[ -z $oldPort ]] ; then
                 # No port in old sshd_config file
                 # no new port, no old port - tell user standard port
                 echo "Default Port 22 used for ssh server"
