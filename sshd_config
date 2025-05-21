@@ -1,4 +1,11 @@
-
+#####################################
+#####################################
+#####################################
+#
+# VERSION: 1.0.0
+# DATE: 2025-05-21
+#
+####################################
 # This is the sshd server system-wide configuration file.  See
 # sshd_config(5) for more information.
 
@@ -11,7 +18,7 @@
 
 Include /etc/ssh/sshd_config.d/*.conf
 
-#Port 22
+Port 522
 #AddressFamily any
 #ListenAddress 0.0.0.0
 #ListenAddress ::
